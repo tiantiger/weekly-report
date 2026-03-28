@@ -6,6 +6,7 @@
     <title>运营部周报</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -628,6 +629,36 @@
             transform: translateY(0);
         }
 
+        .import-toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(39, 174, 96, 0.95);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
+            z-index: 1001;
+            font-family: "Microsoft YaHei", sans-serif;
+            pointer-events: none;
+        }
+
+        .import-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .import-toast.error {
+            background: rgba(231, 76, 60, 0.95);
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
+        }
+
         /* 编辑状态指示器 */
         .editing-indicator {
             position: absolute;
@@ -709,7 +740,7 @@
             .cloud-btn-group {
                 top: 12px;
                 right: 12px;
-                width: 120px;
+                width: 140px;
                 gap: 6px;
             }
             .action-btn {
@@ -758,13 +789,20 @@
             <button class="action-btn" id="exportBtn" onclick="exportToImage()">
                 <span class="action-icon">📷</span><span class="action-text">导出图片</span>
             </button>
+            <button class="action-btn" id="exportExcelBtn" onclick="exportToExcel()">
+                <span class="action-icon">📥</span><span class="action-text">导出Excel</span>
+            </button>
             <button class="action-btn" id="titleEditBtn" onclick="toggleTitleEdit()">
                 <span class="action-icon">🏷️</span><span class="action-text">编辑标题</span>
+            </button>
+            <button class="action-btn" id="importExcelBtn" onclick="document.getElementById('excelInput').click()">
+                <span class="action-icon">📤</span><span class="action-text">导入Excel</span>
             </button>
             <button class="action-btn" id="syncBtn" onclick="manualSync()">
                 <span class="action-icon">☁️</span><span class="action-text">同步数据</span>
             </button>
         </div>
+        <input type="file" id="excelInput" accept=".xlsx,.xls" style="display:none" onchange="importFromExcel(event)">
         <!-- 同步状态 -->
         <div class="sync-status disconnected" id="syncStatus">
             <div class="sync-dot"></div>
@@ -1908,6 +1946,126 @@
         var _te=false;
         function toggleTitleEdit(){_te=!_te;var b=document.getElementById('titleEditBtn');var ts=document.querySelectorAll('.editable-title');if(_te){document.body.classList.add('title-editing');b.classList.add('active');b.innerHTML='<span class="action-icon">✅</span><span class="action-text">完成编辑</span>';ts.forEach(function(el){el.contentEditable='true';});}else{document.body.classList.remove('title-editing');b.classList.remove('active');b.innerHTML='<span class="action-icon">🏷️</span><span class="action-text">编辑标题</span>';ts.forEach(function(el){el.contentEditable='false';});_ds();}}
         var _origTE=toggleEdit;toggleEdit=function(cid){_origTE(cid);if(!editingStates.get(cid))_ds();};
+
+        // ===== Excel 导入导出 =====
+        var _excelMap=[
+            ['重点数据','商业化收入','目标值(万)','revenue-target'],
+            ['重点数据','商业化收入','已完成(万)','revenue-actual'],
+            ['重点数据','吉拉福兑换','财年GMV','jilafu-gmv'],
+            ['重点数据','吉拉福兑换','仓配毛利率','jilafu-margin'],
+            ['重点数据','投标报价','中标数','bid-won'],
+            ['重点数据','投标报价','丢标数','bid-lost'],
+            ['重点数据','大客户表现','内容','accounts-text'],
+            ['网站表现','近一周大盘兑换','累计兑换值','exchange-total'],
+            ['网站表现','近一周大盘兑换','同比','exchange-yoy'],
+            ['网站表现','近一周大盘流量','DAU(万)','dau-input'],
+            ['网站表现','近一周大盘流量','订单数','orders-input'],
+            ['网站表现','近一周大盘流量','转化率','conversion-input'],
+            ['网站表现','近一周搜索流量','UV','search-uv'],
+            ['网站表现','近一周搜索流量','PV','search-pv'],
+            ['网站表现','近一周搜索流量','无结果率','search-noresult'],
+            ['网站表现','近一周搜索流量','说明','search-note'],
+            ['网站表现','官网','DAU(万)','official-dau'],
+            ['网站表现','官网','GMV(万)','official-gmv'],
+            ['网站表现','官网','毛利率(%)','official-margin'],
+            ['网站表现','甄选','DAU(万)','zhenxuan-dau'],
+            ['网站表现','甄选','GMV(万)','zhenxuan-gmv'],
+            ['网站表现','甄选','毛利率(%)','zhenxuan-margin'],
+            ['网站表现','百福得','DAU(万)','baifude-dau'],
+            ['网站表现','百福得','GMV(万)','baifude-gmv'],
+            ['网站表现','百福得','毛利率(%)','baifude-margin'],
+            ['营销进展','营销整体','本周GMV','mkt-gmv'],
+            ['营销进展','营销整体','本周毛利率','mkt-margin'],
+            ['营销进展','营销整体','高于大盘','mkt-above'],
+            ['营销进展','营销整体','贡献利润','mkt-profit'],
+            ['营销进展','营销整体','说明','mkt-note'],
+            ['营销进展','商业化营销','目标值(万)','cm-target'],
+            ['营销进展','商业化营销','已完成(万)','cm-actual'],
+            ['营销进展','商业化营销','说明','cm-note'],
+            ['营销进展','吉拉福','财年GMV','mk-jilafu-gmv'],
+            ['营销进展','吉拉福','仓配毛利率','mk-jilafu-margin'],
+            ['营销进展','吉拉福','说明','mk-jilafu-note'],
+            ['营销进展','奇物社','DAU(万)','qiwu-dau'],
+            ['营销进展','奇物社','GMV(万)','qiwu-gmv'],
+            ['营销进展','奇物社','毛利率(%)','qiwu-margin'],
+            ['营销进展','奇物社','说明','qiwu-note'],
+            ['大客户运营','进展较好的客户','内容','good-clients-text'],
+            ['大客户运营','进展不佳的客户','内容','bad-clients-text'],
+            ['大客户运营','投标报价详情','内容','bidding-details-text'],
+            ['产品进展','本周产品动态','内容','product-text']
+        ];
+
+        function exportToExcel(){
+            var ws_data=[['板块','项目','字段','值']];
+            _excelMap.forEach(function(r){
+                var el=document.getElementById(r[3]);
+                ws_data.push([r[0],r[1],r[2],el?el.value:'']);
+            });
+            var wb=XLSX.utils.book_new();
+            var ws=XLSX.utils.aoa_to_sheet(ws_data);
+            ws['!cols']=[{wch:12},{wch:18},{wch:16},{wch:50}];
+            // 冻结首行
+            ws['!freeze']={x:0,y:0};
+            XLSX.utils.book_append_sheet(wb,ws,'周报数据');
+            XLSX.writeFile(wb,'运营部周报_'+new Date().toISOString().slice(0,10)+'.xlsx');
+            _showToast('Excel 已导出');
+        }
+
+        function importFromExcel(ev){
+            var file=ev.target.files[0];
+            if(!file)return;
+            var reader=new FileReader();
+            reader.onload=function(e){
+                try{
+                    var wb=XLSX.read(e.target.result,{type:'array'});
+                    var ws=wb.Sheets[wb.SheetNames[0]];
+                    if(!ws){_showToast('未找到工作表','error');return;}
+                    var data=XLSX.utils.sheet_to_json(ws);
+                    var count=0;
+                    data.forEach(function(row){
+                        var sec=String(row['板块']||'').trim();
+                        var card=String(row['项目']||'').trim();
+                        var field=String(row['字段']||'').trim();
+                        var val=String(row['值']||'');
+                        _excelMap.forEach(function(m){
+                            if(m[0]===sec&&m[1]===card&&m[2]===field){
+                                var el=document.getElementById(m[3]);
+                                if(el&&val){el.value=val;count++;}
+                            }
+                        });
+                    });
+                    if(count>0){
+                        _refreshAll();
+                        updateChartsFromTable();
+                        updateProgress('commercial-revenue');
+                        updateBidProgress();
+                        updateCMProgress();
+                        _ds();
+                        _showToast('导入成功，已填充 '+count+' 个字段');
+                    }else{
+                        _showToast('未匹配到任何字段，请检查Excel格式','error');
+                    }
+                }catch(err){
+                    console.error(err);
+                    _showToast('导入失败：'+err.message,'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            ev.target.value='';
+        }
+
+        function _showToast(msg,type){
+            var t=document.getElementById('importToast');
+            if(!t){
+                t=document.createElement('div');
+                t.id='importToast';
+                t.className='import-toast';
+                document.body.appendChild(t);
+            }
+            t.textContent=msg;
+            t.className='import-toast'+(type==='error'?' error':'')+' show';
+            setTimeout(function(){t.className='import-toast';},3000);
+        }
 
         // 初始化
         window.onload = function() {
