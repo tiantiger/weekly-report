@@ -96,10 +96,10 @@
 
         /* 导出按钮 */
         .export-btn {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 1000;
+            position: static;
+            
+            
+            
             background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
             backdrop-filter: blur(20px);
             border: 2px solid var(--morandi-orange);
@@ -1873,7 +1873,7 @@
         function _ds(){clearTimeout(_stmr);_stmr=setTimeout(saveToCloud,2000);}
         function manualSync(){var b=document.getElementById('syncBtn');b.classList.add('syncing');loadFromCloud();setTimeout(function(){b.classList.remove('syncing');},2000);}
         var _te=false;
-        function toggleTitleEdit(){_te=!_te;var b=document.getElementById('titleEditBtn');if(_te){document.body.classList.add('title-editing');b.classList.add('active');b.innerHTML='<span class="action-icon">✅</span><span class="action-text">完成编辑</span>';}else{document.body.classList.remove('title-editing');b.classList.remove('active');b.innerHTML='<span class="action-icon">🏷️</span><span class="action-text">编辑标题</span>';_ds();}}
+        function toggleTitleEdit(){_te=!_te;var b=document.getElementById('titleEditBtn');var ts=document.querySelectorAll('.editable-title');if(_te){document.body.classList.add('title-editing');b.classList.add('active');b.innerHTML='<span class="action-icon">✅</span><span class="action-text">完成编辑</span>';ts.forEach(function(el){el.contentEditable='true';});}else{document.body.classList.remove('title-editing');b.classList.remove('active');b.innerHTML='<span class="action-icon">🏷️</span><span class="action-text">编辑标题</span>';ts.forEach(function(el){el.contentEditable='false';});_ds();}}
         var _origTE=toggleEdit;toggleEdit=function(cid){_origTE(cid);if(!editingStates.get(cid))_ds();};
 
         // 初始化
