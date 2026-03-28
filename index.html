@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运营部周报</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --morandi-orange: #D4A373;
+            --morandi-orange-light: #E6C9A8;
+            --morandi-orange-dark: #B8905F;
+            --morandi-bg: #F5E6D3;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #2C3E50;
+            --text-secondary: #5D6D7E;
+            --accent-blue: #7FB3D5;
+            --accent-red: #E8A598;
+            --border-color: rgba(212, 163, 115, 0.3);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            
+            /* 字体大小规范 - 微软雅黑 */
+            --font-size-header: 48px;      /* 顶部大标题 */
+            --font-size-section: 28px;     /* 板块标题 */
+            --font-size-card-title: 18px;   /* 卡片标题 */
+            --font-size-field-label: 13px;  /* 字段标签 */
+            --font-size-field-value: 22px;  /* 字段数值 */
+            --font-size-body: 14px;         /* 正文内容 */
+            --font-size-small: 13px;        /* 辅助说明文字 */
+            --font-size-chart: 11px;        /* 图表文字 */
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #E8D5C4 0%, #D4A373 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            font-size: var(--font-size-body);
+        }
+
+        /* 科技星辰底纹 */
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 导出按钮 */
+        .export-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--morandi-orange);
+            color: var(--morandi-orange-dark);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: var(--font-size-body);
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(212, 163, 115, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 163, 115, 0.4);
+            background: var(--morandi-orange);
+            color: white;
+        }
+
+        .export-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 顶部标题 */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: var(--font-size-header);
+            font-weight: 700;
+            background: linear-gradient(135deg, #2C3E50 0%, #D4A373 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 板块样式 */
+        .section {
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: var(--font-size-section);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            position: relative;
+            padding: 15px 0;
+            letter-spacing: 1px;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 横向色块突出 */
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(212, 163, 115, 0.3) 20%, rgba(212, 163, 115, 0.5) 50%, rgba(212, 163, 115, 0.3) 80%, transparent 100%);
+            border-radius: 12px;
+            z-index: -1;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--morandi-orange);
+            border-radius: 2px;
+        }
+
+        /* 卡片网格布局 */
+        .cards-row {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cards-row.four-cols {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .cards-row.three-cols {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .cards-row.two-cols {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cards-row.one-col {
+            grid-template-columns: 1fr;
+        }
+
+        /* 卡片样式 - 苹果风玻璃拟态 */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+            border-color: rgba(212, 163, 115, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: var(--font-size-card-title);
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--morandi-orange) 0%, var(--morandi-orange-light) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(212, 163, 115, 0.3);
+        }
+
+        /* 编辑按钮 */
+        .edit-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(212, 163, 115, 0.15);
+            color: var(--morandi-orange-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            backdrop-filter: blur(4px);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .edit-btn:hover {
+            background: var(--morandi-orange);
+            color: white;
+            transform: rotate(15deg);
+            box-shadow: 0 4px 12px rgba(212, 163, 115, 0.4);
+        }
+
+        .edit-btn.active {
+            background: #27AE60;
+            color: white;
+        }
+
+        /* 内容区域 - 字体统一 */
+        .card-content {
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .field-group {
+            margin-bottom: 12px;
+        }
+
+        .field-label {
+            font-size: var(--font-size-field-label);
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .field-value {
+            font-size: var(--font-size-field-value);
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .field-suffix {
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+            margin-left: 4px;
+            font-weight: 500;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 输入框样式 - 统一字体 */
+        .editable-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: var(--font-size-body);
+            font-family: "Microsoft YaHei", sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .editable-input:focus {
+            border-color: var(--morandi-orange);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.1);
+        }
+
+        .editable-input.number {
+            font-weight: 700;
+            font-size: var(--font-size-field-value);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            height: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-bar.orange {
+            background: linear-gradient(90deg, var(--morandi-orange) 0%, var(--morandi-orange-light) 100%);
+        }
+
+        .progress-bar.blue {
+            background: linear-gradient(90deg, var(--accent-blue) 0%, #A8D5E5 100%);
+        }
+
+        .progress-bar.red {
+            background: linear-gradient(90deg, var(--accent-red) 0%, #F5C5BC 100%);
+        }
+
+        .progress-text {
+            margin-top: 6px;
+            font-size: var(--font-size-small);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: right;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 对比进度条 */
+        .dual-progress {
+            display: flex;
+            height: 24px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.03);
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .dual-bar {
+            height: 100%;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--font-size-small);
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .dual-bar.blue {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #5DADE2 100%);
+        }
+
+        .dual-bar.red {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #F1948A 100%);
+        }
+
+        .dual-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: var(--font-size-small);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.blue { background: var(--accent-blue); }
+        .legend-dot.red { background: var(--accent-red); }
+
+        /* 文本域样式 - 统一字体 */
+        .editable-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            font-size: var(--font-size-body);
+            line-height: 1.5;
+            font-family: "Microsoft YaHei", sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
+            resize: vertical;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .editable-textarea:focus {
+            border-color: var(--morandi-orange);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.1);
+        }
+
+        /* 图表容器 - 关键修复：固定高度 */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            height: 200px; /* 固定高度防止过度拉伸 */
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: var(--font-size-body);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-align: center;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 分端表现表格 - 统一字体 */
+        .platform-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .platform-table th,
+        .platform-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(212, 163, 115, 0.2);
+        }
+
+        .platform-table th {
+            background: rgba(212, 163, 115, 0.15);
+            font-weight: 600;
+            font-size: var(--font-size-small);
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .platform-table td {
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .platform-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .platform-input {
+            width: 100%;
+            padding: 6px;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            text-align: center;
+            font-size: var(--font-size-body);
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: var(--text-primary);
+        }
+
+        .platform-input:focus {
+            background: white;
+            border-color: var(--morandi-orange);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.1);
+        }
+
+        /* 自适应高度文本卡片 */
+        .auto-height-card .editable-textarea {
+            min-height: 60px;
+        }
+
+        /* 保存提示 */
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(39, 174, 96, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: var(--font-size-body);
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
+            z-index: 1000;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 编辑状态指示器 */
+        .editing-indicator {
+            position: absolute;
+            top: 10px;
+            right: 46px;
+            width: 8px;
+            height: 8px;
+            background: #E74C3C;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .card.editing .editing-indicator {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* 导出加载遮罩 */
+        .export-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .export-overlay.active {
+            display: flex;
+        }
+
+        .export-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: var(--morandi-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .export-text {
+            color: white;
+            font-size: var(--font-size-body);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .cards-row.four-cols { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .cards-row.four-cols,
+            .cards-row.three-cols,
+            .cards-row.two-cols,
+            .charts-row { grid-template-columns: 1fr; }
+            
+            .header h1 { font-size: 32px; }
+            .section-title { font-size: 22px; }
+            
+            .export-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            
+            .chart-container {
+                height: 180px; /* 移动端更小 */
+            }
+        }
+
+        /* 确保所有文本元素继承字体 */
+        div, span, p, input, textarea, button, table, th, td {
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+        }
+
+        /* ===== 云同步样式 ===== */
+        .cloud-btn-group {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sync-btn, .setup-btn {
+            backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: var(--font-size-body);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .sync-btn {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            border: 2px solid var(--accent-blue);
+            color: var(--accent-blue);
+            box-shadow: 0 4px 20px rgba(127, 179, 213, 0.3);
+        }
+
+        .sync-btn:hover { background: var(--accent-blue); color: white; transform: translateY(-2px); }
+        .sync-btn.syncing { opacity: 0.7; pointer-events: none; }
+
+        .setup-btn {
+            font-size: 13px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            border: 2px solid #9B59B6;
+            color: #9B59B6;
+            box-shadow: 0 4px 20px rgba(155, 89, 182, 0.3);
+        }
+
+        .setup-btn:hover { background: #9B59B6; color: white; transform: translateY(-2px); }
+
+        .setup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            z-index: 10000; display: none; justify-content: center; align-items: center;
+        }
+        .setup-overlay.active { display: flex; }
+
+        .setup-panel {
+            background: white; border-radius: 24px; padding: 40px;
+            max-width: 520px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .setup-panel h2 { font-size: 22px; color: var(--text-primary); margin-bottom: 8px; }
+        .setup-panel > p { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+        .setup-panel .step {
+            background: #F8F9FA; border-radius: 12px; padding: 16px; margin-bottom: 16px;
+            border-left: 4px solid var(--morandi-orange);
+        }
+        .setup-panel .step h3 { font-size: 14px; margin-bottom: 8px; }
+        .setup-panel .step p { margin-bottom: 0; font-size: 13px; color: var(--text-secondary); }
+        .setup-panel .step code {
+            background: rgba(212,163,115,0.15); padding: 2px 6px; border-radius: 4px;
+            font-size: 12px; color: var(--morandi-orange-dark);
+        }
+        .setup-panel .step a { color: var(--accent-blue); text-decoration: none; font-weight: 600; }
+        .setup-panel .step a:hover { text-decoration: underline; }
+        .setup-input-group { margin-top: 20px; }
+        .setup-input-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .setup-input-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid #E0E0E0;
+            border-radius: 12px; font-size: 14px; outline: none; transition: border-color 0.3s;
+        }
+        .setup-input-group input:focus { border-color: var(--morandi-orange); }
+        .setup-actions { display: flex; gap: 12px; margin-top: 20px; }
+        .setup-actions button {
+            flex: 1; padding: 12px; border-radius: 12px; font-size: 14px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s; border: none;
+        }
+        .btn-primary { background: var(--morandi-orange); color: white; }
+        .btn-primary:hover { background: var(--morandi-orange-dark); }
+        .btn-secondary { background: #F0F0F0; color: var(--text-secondary); }
+        .btn-secondary:hover { background: #E0E0E0; }
+        .btn-create {
+            background: linear-gradient(135deg, #27AE60, #2ECC71); color: white;
+            margin-top: 10px; width: 100%; padding: 10px; border-radius: 8px;
+            font-size: 13px; cursor: pointer; font-weight: 600; border: none;
+        }
+        .btn-create:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(39,174,96,0.4); }
+
+        .sync-status {
+            position: fixed; bottom: 30px; left: 30px; z-index: 1000;
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 18px; border-radius: 30px; font-size: 13px;
+            font-weight: 600; backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .sync-status.connected { background: rgba(39,174,96,0.15); color: #27AE60; border: 1px solid rgba(39,174,96,0.3); }
+        .sync-status.disconnected { background: rgba(231,76,60,0.15); color: #E74C3C; border: 1px solid rgba(231,76,60,0.3); }
+        .sync-status.saving { background: rgba(212,163,115,0.15); color: var(--morandi-orange-dark); border: 1px solid rgba(212,163,115,0.3); }
+        .sync-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .sync-status.connected .sync-dot { background: #27AE60; }
+        .sync-status.disconnected .sync-dot { background: #E74C3C; }
+        .sync-status.saving .sync-dot { background: var(--morandi-orange); animation: pulse 1s infinite; }
+    </style>
+</head>
+<body>
+    <!-- 星辰底纹背景 -->
+    <div class="stars-bg" id="starsBg"></div>
+
+    <!-- 右上角按钮组 -->
+    <div class="cloud-btn-group">
+        <button class="export-btn" onclick="exportToImage()">
+            <span>📷</span>
+            <span>导出图片</span>
+        </button>
+        <button class="sync-btn" id="syncBtn" onclick="manualSync()">
+            <span>☁️</span>
+            <span>同步数据</span>
+        </button>
+        <button class="setup-btn" onclick="showSetup()">
+            <span>⚙️</span>
+            <span>云同步设置</span>
+        </button>
+    </div>
+
+    <!-- 云同步配置面板 -->
+    <div class="setup-overlay" id="setupOverlay">
+        <div class="setup-panel">
+            <h2>☁️ 云同步配置</h2>
+            <p>配置后，团队编辑的数据会自动保存到云端，所有人打开链接看到同一份数据。</p>
+            <div class="step">
+                <h3>第一步：创建云端数据桶</h3>
+                <p>点击下方按钮，自动创建数据桶（无需注册，使用 jsonblob.com 免费服务）。</p>
+                <button class="btn-create" onclick="createBlob()">✨ 一键创建数据桶</button>
+            </div>
+            <div class="step">
+                <h3>第二步：粘贴数据桶 ID</h3>
+                <p>创建成功后会自动填入。也可手动输入已有 ID，或从 URL <code>https://jsonblob.com/api/jsonBlob/{ID}</code> 中提取。</p>
+            </div>
+            <div class="setup-input-group">
+                <label>数据桶 ID（Blob ID）</label>
+                <input type="text" id="blobIdInput" placeholder="例如：1294958539164033024">
+            </div>
+            <div class="setup-actions">
+                <button class="btn-secondary" onclick="hideSetup()">取消</button>
+                <button class="btn-primary" onclick="saveBlobId()">保存并连接</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 同步状态指示器 -->
+    <div class="sync-status disconnected" id="syncStatus">
+        <div class="sync-dot"></div>
+        <span id="syncStatusText">未连接云同步</span>
+    </div>
+
+    <!-- 导出加载遮罩 -->
+    <div class="export-overlay" id="exportOverlay">
+        <div class="export-spinner"></div>
+        <div class="export-text">正在生成周报图片，请稍候...</div>
+    </div>
+
+    <div class="container" id="reportContent">
+        <!-- 顶部标题 -->
+        <div class="header">
+            <h1>运营部周报</h1>
+        </div>
+
+        <!-- 板块一：重点数据 -->
+        <div class="section">
+            <div class="section-title">重点数据</div>
+            <div class="cards-row four-cols">
+                <!-- 卡片1：商业化收入 -->
+                <div class="card" data-card-id="commercial-revenue">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">💰</div>
+                            商业化收入
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('commercial-revenue')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">目标值</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="revenue-target-display">100</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="number" class="editable-input number edit-mode" id="revenue-target" value="100" style="display:none;" onchange="updateProgress('commercial-revenue')">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">已完成</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="revenue-actual-display">65</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="number" class="editable-input number edit-mode" id="revenue-actual" value="65" style="display:none;" onchange="updateProgress('commercial-revenue')">
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar orange" id="revenue-progress" style="width: 65%"></div>
+                        </div>
+                        <div class="progress-text" id="revenue-percent">65%</div>
+                    </div>
+                </div>
+
+                <!-- 卡片2：吉拉福兑换 -->
+                <div class="card" data-card-id="jilafu-exchange">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🎁</div>
+                            吉拉福兑换
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('jilafu-exchange')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">财年GMV</div>
+                            <div class="display-mode" id="jilafu-gmv-display">¥2,450万</div>
+                            <input type="text" class="editable-input edit-mode" id="jilafu-gmv" value="¥2,450万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">仓配毛利率</div>
+                            <div class="display-mode" id="jilafu-margin-display">23.5%</div>
+                            <input type="text" class="editable-input edit-mode" id="jilafu-margin" value="23.5%" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片3：投标报价 -->
+                <div class="card" data-card-id="bidding-stats">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">📊</div>
+                            投标报价
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('bidding-stats')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">中标数 / 丢标数</div>
+                            <div class="display-mode">
+                                <span class="field-value" style="color: var(--accent-blue);" id="bid-won-display">12</span>
+                                <span style="margin: 0 8px; color: var(--text-secondary);">/</span>
+                                <span class="field-value" style="color: var(--accent-red);" id="bid-lost-display">3</span>
+                            </div>
+                            <div class="edit-mode" style="display:none;">
+                                <input type="number" class="editable-input number" id="bid-won" value="12" style="width: 48%; display: inline-block;" onchange="updateBidProgress()">
+                                <span style="margin: 0 2%; color: var(--text-secondary);">/</span>
+                                <input type="number" class="editable-input number" id="bid-lost" value="3" style="width: 48%; display: inline-block;" onchange="updateBidProgress()">
+                            </div>
+                        </div>
+                        <div class="dual-progress" id="bid-progress-bar">
+                            <div class="dual-bar blue" style="width: 80%">80%</div>
+                            <div class="dual-bar red" style="width: 20%">20%</div>
+                        </div>
+                        <div class="dual-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot blue"></div>
+                                <span>中标率</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot red"></div>
+                                <span>丢标率</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片4：大客户表现 -->
+                <div class="card auto-height-card" data-card-id="key-accounts">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🏢</div>
+                            大客户表现
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('key-accounts')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="display-mode" id="accounts-display" style="white-space: pre-wrap; line-height: 1.6; font-size: var(--font-size-body);">华为：续约成功，新增订单500万
+阿里：谈判中，预计下周签约
+腾讯：需求确认阶段</div>
+                        <textarea class="editable-textarea edit-mode" id="accounts-text" style="display:none;" placeholder="请输入大客户表现描述...">华为：续约成功，新增订单500万
+阿里：谈判中，预计下周签约
+腾讯：需求确认阶段</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 板块二：网站表现 -->
+        <div class="section">
+            <div class="section-title">网站表现</div>
+            
+            <!-- 第一行：三个数据卡片 -->
+            <div class="cards-row three-cols">
+                <!-- 近一周大盘兑换 -->
+                <div class="card" data-card-id="exchange-overview">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">💱</div>
+                            近一周大盘兑换
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('exchange-overview')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">财年累计兑换值</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="exchange-total-display">8,920</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="text" class="editable-input edit-mode" id="exchange-total" value="8,920万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">同比</div>
+                            <div class="display-mode" id="exchange-yoy-display">+15.3%</div>
+                            <input type="text" class="editable-input edit-mode" id="exchange-yoy" value="+15.3%" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 近一周大盘流量 -->
+                <div class="card" data-card-id="traffic-overview">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🌊</div>
+                            近一周大盘流量
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('traffic-overview')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">DAU</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="dau-display">125.6</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="text" class="editable-input edit-mode" id="dau-input" value="125.6万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">订单数</div>
+                            <div class="display-mode" id="orders-display">45,832</div>
+                            <input type="text" class="editable-input edit-mode" id="orders-input" value="45,832" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">转化率</div>
+                            <div class="display-mode" id="conversion-display">3.65%</div>
+                            <input type="text" class="editable-input edit-mode" id="conversion-input" value="3.65%" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 近一周搜索流量 -->
+                <div class="card" data-card-id="search-traffic">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🔍</div>
+                            近一周搜索流量
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('search-traffic')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">UV</div>
+                            <div class="display-mode" id="search-uv-display">89,234</div>
+                            <input type="text" class="editable-input edit-mode" id="search-uv" value="89,234" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">PV</div>
+                            <div class="display-mode" id="search-pv-display">245,678</div>
+                            <input type="text" class="editable-input edit-mode" id="search-pv" value="245,678" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">无结果率</div>
+                            <div class="display-mode" id="search-noresult-display">4.2%</div>
+                            <input type="text" class="editable-input edit-mode" id="search-noresult" value="4.2%" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">说明</div>
+                            <div class="display-mode" id="search-note-display" style="font-size: var(--font-size-small); color: var(--text-secondary);">搜索优化后提升明显</div>
+                            <input type="text" class="editable-input edit-mode" id="search-note" value="搜索优化后提升明显" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分端表现 -->
+            <div class="card" data-card-id="platform-performance" style="margin-top: 20px;">
+                <div class="editing-indicator"></div>
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">📱</div>
+                        分端表现
+                    </div>
+                    <button class="edit-btn" onclick="toggleEdit('platform-performance')">✏️</button>
+                </div>
+                <div class="card-content">
+                    <table class="platform-table" id="platform-table">
+                        <thead>
+                            <tr>
+                                <th>平台</th>
+                                <th>DAU (万)</th>
+                                <th>GMV (万)</th>
+                                <th>毛利率 (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-platform="official">
+                                <td><strong>官网</strong></td>
+                                <td>
+                                    <span class="display-mode" id="official-dau-display">45.2</span>
+                                    <input type="number" class="platform-input edit-mode" id="official-dau" value="45.2" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="official-gmv-display">1,250</span>
+                                    <input type="number" class="platform-input edit-mode" id="official-gmv" value="1250" step="1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="official-margin-display">25.3</span>
+                                    <input type="number" class="platform-input edit-mode" id="official-margin" value="25.3" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                            </tr>
+                            <tr data-platform="zhenxuan">
+                                <td><strong>甄选</strong></td>
+                                <td>
+                                    <span class="display-mode" id="zhenxuan-dau-display">52.8</span>
+                                    <input type="number" class="platform-input edit-mode" id="zhenxuan-dau" value="52.8" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="zhenxuan-gmv-display">1,890</span>
+                                    <input type="number" class="platform-input edit-mode" id="zhenxuan-gmv" value="1890" step="1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="zhenxuan-margin-display">22.7</span>
+                                    <input type="number" class="platform-input edit-mode" id="zhenxuan-margin" value="22.7" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                            </tr>
+                            <tr data-platform="baifude">
+                                <td><strong>百福得</strong></td>
+                                <td>
+                                    <span class="display-mode" id="baifude-dau-display">27.6</span>
+                                    <input type="number" class="platform-input edit-mode" id="baifude-dau" value="27.6" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="baifude-gmv-display">856</span>
+                                    <input type="number" class="platform-input edit-mode" id="baifude-gmv" value="856" step="1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                                <td>
+                                    <span class="display-mode" id="baifude-margin-display">28.1</span>
+                                    <input type="number" class="platform-input edit-mode" id="baifude-margin" value="28.1" step="0.1" style="display:none;" onchange="updateChartsFromTable()">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 图表区域 - 压缩尺寸 -->
+                    <div class="charts-row">
+                        <div class="chart-container">
+                            <div class="chart-title">DAU对比 (万)</div>
+                            <canvas id="dauChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-title">GMV与毛利率分析</div>
+                            <canvas id="comboChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 板块三：营销进展 -->
+        <div class="section">
+            <div class="section-title">营销进展</div>
+            <div class="cards-row two-cols">
+                <!-- 卡片1：营销整体 -->
+                <div class="card" data-card-id="marketing-overview">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">📢</div>
+                            营销整体
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('marketing-overview')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">本周GMV</div>
+                            <div class="display-mode" id="mkt-gmv-display">¥1,250万</div>
+                            <input type="text" class="editable-input edit-mode" id="mkt-gmv" value="¥1,250万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">本周毛利率</div>
+                            <div class="display-mode" id="mkt-margin-display">24.5%</div>
+                            <input type="text" class="editable-input edit-mode" id="mkt-margin" value="24.5%" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">高于大盘</div>
+                            <div class="display-mode" id="mkt-above-display">+3.2%</div>
+                            <input type="text" class="editable-input edit-mode" id="mkt-above" value="+3.2%" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">贡献利润</div>
+                            <div class="display-mode" id="mkt-profit-display">¥306万</div>
+                            <input type="text" class="editable-input edit-mode" id="mkt-profit" value="¥306万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">说明</div>
+                            <div class="display-mode" id="mkt-note-display" style="font-size: var(--font-size-small);">春节营销活动效果显著</div>
+                            <input type="text" class="editable-input edit-mode" id="mkt-note" value="春节营销活动效果显著" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片2：商业化营销 -->
+                <div class="card" data-card-id="commercial-marketing">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🎯</div>
+                            商业化营销
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('commercial-marketing')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">目标值</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="cm-target-display">80</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="number" class="editable-input number edit-mode" id="cm-target" value="80" style="display:none;" onchange="updateCMProgress()">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">已完成</div>
+                            <div class="display-mode">
+                                <span class="field-value" id="cm-actual-display">52</span>
+                                <span class="field-suffix">万</span>
+                            </div>
+                            <input type="number" class="editable-input number edit-mode" id="cm-actual" value="52" style="display:none;" onchange="updateCMProgress()">
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar orange" id="cm-progress" style="width: 65%"></div>
+                        </div>
+                        <div class="progress-text" id="cm-percent">65%</div>
+                        <div class="field-group" style="margin-top: 8px;">
+                            <div class="field-label">说明</div>
+                            <div class="display-mode" id="cm-note-display" style="font-size: var(--font-size-small);">品牌广告库存紧张</div>
+                            <input type="text" class="editable-input edit-mode" id="cm-note" value="品牌广告库存紧张" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片3：吉拉福 -->
+                <div class="card" data-card-id="marketing-jilafu">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🎁</div>
+                            吉拉福
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('marketing-jilafu')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">财年GMV</div>
+                            <div class="display-mode" id="mk-jilafu-gmv-display">¥3,200万</div>
+                            <input type="text" class="editable-input edit-mode" id="mk-jilafu-gmv" value="¥3,200万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">仓配毛利率</div>
+                            <div class="display-mode" id="mk-jilafu-margin-display">21.8%</div>
+                            <input type="text" class="editable-input edit-mode" id="mk-jilafu-margin" value="21.8%" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">说明</div>
+                            <div class="display-mode" id="mk-jilafu-note-display" style="font-size: var(--font-size-small);">企业集采需求增长</div>
+                            <input type="text" class="editable-input edit-mode" id="mk-jilafu-note" value="企业集采需求增长" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 卡片4：奇物社 -->
+                <div class="card" data-card-id="qiwushe">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">🎨</div>
+                            奇物社
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('qiwushe')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="field-group">
+                            <div class="field-label">DAU</div>
+                            <div class="display-mode" id="qiwu-dau-display">12.5万</div>
+                            <input type="text" class="editable-input edit-mode" id="qiwu-dau" value="12.5万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">GMV</div>
+                            <div class="display-mode" id="qiwu-gmv-display">¥468万</div>
+                            <input type="text" class="editable-input edit-mode" id="qiwu-gmv" value="¥468万" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">毛利率</div>
+                            <div class="display-mode" id="qiwu-margin-display">35.2%</div>
+                            <input type="text" class="editable-input edit-mode" id="qiwu-margin" value="35.2%" style="display:none;">
+                        </div>
+                        <div class="field-group">
+                            <div class="field-label">说明</div>
+                            <div class="display-mode" id="qiwu-note-display" style="font-size: var(--font-size-small);">文创品类表现优异</div>
+                            <input type="text" class="editable-input edit-mode" id="qiwu-note" value="文创品类表现优异" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 板块四：大客户运营 -->
+        <div class="section">
+            <div class="section-title">大客户运营</div>
+            <div class="cards-row one-col">
+                <!-- 进展较好的客户 -->
+                <div class="card auto-height-card" data-card-id="good-clients">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #27AE60 0%, #2ECC71 100%);">📈</div>
+                            进展较好的客户
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('good-clients')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="display-mode" id="good-clients-display" style="white-space: pre-wrap; line-height: 1.6; color: #27AE60; font-weight: 600; font-size: var(--font-size-body);">1. 华为技术：成功续签年度框架协议，金额2000万，较上期增长15%
+2. 阿里巴巴：双十二项目超额完成，GMV达到预算的125%
+3. 腾讯科技：新业务线拓展顺利，已确认Q2合作意向</div>
+                        <textarea class="editable-textarea edit-mode" id="good-clients-text" style="display:none;" placeholder="请输入进展较好的客户信息...">1. 华为技术：成功续签年度框架协议，金额2000万，较上期增长15%
+2. 阿里巴巴：双十二项目超额完成，GMV达到预算的125%
+3. 腾讯科技：新业务线拓展顺利，已确认Q2合作意向</textarea>
+                    </div>
+                </div>
+
+                <!-- 进展不佳的客户 -->
+                <div class="card auto-height-card" data-card-id="bad-clients">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #E74C3C 0%, #EC7063 100%);">📉</div>
+                            进展不佳的客户
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('bad-clients')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="display-mode" id="bad-clients-display" style="white-space: pre-wrap; line-height: 1.6; color: #E74C3C; font-weight: 600; font-size: var(--font-size-body);">1. 京东：采购预算冻结，Q1项目暂缓，需密切关注恢复时间
+2. 美团：竞争激烈，价格谈判陷入僵局，需要高层介入
+3. 字节跳动：需求变更频繁，项目延期，需重新评估合作模式</div>
+                        <textarea class="editable-textarea edit-mode" id="bad-clients-text" style="display:none;" placeholder="请输入进展不佳的客户信息...">1. 京东：采购预算冻结，Q1项目暂缓，需密切关注恢复时间
+2. 美团：竞争激烈，价格谈判陷入僵局，需要高层介入
+3. 字节跳动：需求变更频繁，项目延期，需重新评估合作模式</textarea>
+                    </div>
+                </div>
+
+                <!-- 投标报价 -->
+                <div class="card auto-height-card" data-card-id="bidding-details">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon">📋</div>
+                            投标报价
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('bidding-details')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="display-mode" id="bidding-details-display" style="white-space: pre-wrap; line-height: 1.6; font-size: var(--font-size-body);">本周参与投标5个项目：
+- 中国移动：中标，金额800万，交付周期3个月
+- 中国银行：待开标，预计下周三公布结果
+- 国家电网：技术标通过，商务标准备中
+- 中国石化：未中标，竞争对手价格低于我们12%
+- 中国电信：二次议价中，客户对服务方案满意但价格敏感</div>
+                        <textarea class="editable-textarea edit-mode" id="bidding-details-text" style="display:none;" placeholder="请输入投标报价详细信息...">本周参与投标5个项目：
+- 中国移动：中标，金额800万，交付周期3个月
+- 中国银行：待开标，预计下周三公布结果
+- 国家电网：技术标通过，商务标准备中
+- 中国石化：未中标，竞争对手价格低于我们12%
+- 中国电信：二次议价中，客户对服务方案满意但价格敏感</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 板块五：产品进展 -->
+        <div class="section">
+            <div class="section-title">产品进展</div>
+            <div class="cards-row one-col">
+                <div class="card auto-height-card" data-card-id="product-progress">
+                    <div class="editing-indicator"></div>
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-icon" style="background: linear-gradient(135deg, #9B59B6 0%, #AF7AC5 100%);">🚀</div>
+                            本周产品动态
+                        </div>
+                        <button class="edit-btn" onclick="toggleEdit('product-progress')">✏️</button>
+                    </div>
+                    <div class="card-content">
+                        <div class="display-mode" id="product-display" style="white-space: pre-wrap; line-height: 1.6; font-size: var(--font-size-body);">1. 兑换中心2.0版本上线，转化率提升8%，用户好评率92%
+2. 企业采购后台新增批量导入功能，大客户使用效率提升30%
+3. 移动端首页改版完成，跳出率降低5个百分点
+4. 智能推荐算法优化，推荐点击率提升12%
+5. 下周计划：启动积分商城重构项目，预计工期6周</div>
+                        <textarea class="editable-textarea edit-mode" id="product-text" style="display:none;" placeholder="请输入产品进展...">1. 兑换中心2.0版本上线，转化率提升8%，用户好评率92%
+2. 企业采购后台新增批量导入功能，大客户使用效率提升30%
+3. 移动端首页改版完成，跳出率降低5个百分点
+4. 智能推荐算法优化，推荐点击率提升12%
+5. 下周计划：启动积分商城重构项目，预计工期6周</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存提示 -->
+    <div class="save-indicator" id="saveIndicator">✓ 已保存更改</div>
+
+    <script>
+        // 生成星辰背景
+        function createStars() {
+            const starsBg = document.getElementById('starsBg');
+            const starCount = 80;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                starsBg.appendChild(star);
+            }
+        }
+
+        // 编辑状态管理
+        const editingStates = new Map();
+
+        function toggleEdit(cardId) {
+            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+            const isEditing = editingStates.get(cardId) || false;
+            
+            if (isEditing) {
+                // 保存更改
+                saveChanges(cardId);
+                editingStates.set(cardId, false);
+                card.classList.remove('editing');
+                const btn = card.querySelector('.edit-btn');
+                btn.innerHTML = '✏️';
+                btn.classList.remove('active');
+                
+                // 切换显示模式 - 针对分端表现特殊处理
+                if (cardId === 'platform-performance') {
+                    card.querySelectorAll('.platform-input').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    card.querySelectorAll('.display-mode').forEach(el => {
+                        if (!el.closest('.chart-container')) {
+                            el.style.display = '';
+                        }
+                    });
+                } else {
+                    card.querySelectorAll('.edit-mode').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    card.querySelectorAll('.display-mode').forEach(el => {
+                        el.style.display = '';
+                    });
+                }
+                
+                showSaveIndicator();
+            } else {
+                // 进入编辑模式
+                editingStates.set(cardId, true);
+                card.classList.add('editing');
+                const btn = card.querySelector('.edit-btn');
+                btn.innerHTML = '✓';
+                btn.classList.add('active');
+                
+                // 切换编辑模式 - 针对分端表现特殊处理
+                if (cardId === 'platform-performance') {
+                    card.querySelectorAll('.display-mode').forEach(el => {
+                        if (!el.closest('.chart-container')) {
+                            el.style.display = 'none';
+                        }
+                    });
+                    card.querySelectorAll('.platform-input').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                } else {
+                    card.querySelectorAll('.display-mode').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    card.querySelectorAll('.edit-mode').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                }
+                
+                // 自适应高度调整
+                if (cardId !== 'platform-performance') {
+                    card.querySelectorAll('.editable-textarea').forEach(textarea => {
+                        textarea.style.height = 'auto';
+                        textarea.style.height = textarea.scrollHeight + 'px';
+                    });
+                }
+            }
+        }
+
+        function saveChanges(cardId) {
+            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+            
+            // 根据卡片类型保存数据
+            switch(cardId) {
+                case 'commercial-revenue':
+                    updateField('revenue-target', 'revenue-target-display');
+                    updateField('revenue-actual', 'revenue-actual-display');
+                    updateProgress(cardId);
+                    break;
+                case 'jilafu-exchange':
+                    updateText('jilafu-gmv', 'jilafu-gmv-display');
+                    updateText('jilafu-margin', 'jilafu-margin-display');
+                    break;
+                case 'bidding-stats':
+                    updateField('bid-won', 'bid-won-display');
+                    updateField('bid-lost', 'bid-lost-display');
+                    updateBidProgress();
+                    break;
+                case 'key-accounts':
+                    updateTextarea('accounts-text', 'accounts-display');
+                    break;
+                case 'exchange-overview':
+                    updateText('exchange-total', 'exchange-total-display');
+                    updateText('exchange-yoy', 'exchange-yoy-display');
+                    break;
+                case 'traffic-overview':
+                    updateText('dau-input', 'dau-display');
+                    updateText('orders-input', 'orders-display');
+                    updateText('conversion-input', 'conversion-display');
+                    break;
+                case 'search-traffic':
+                    updateText('search-uv', 'search-uv-display');
+                    updateText('search-pv', 'search-pv-display');
+                    updateText('search-noresult', 'search-noresult-display');
+                    updateText('search-note', 'search-note-display');
+                    break;
+                case 'platform-performance':
+                    // 分端表现特殊处理 - 更新所有字段并同步图表
+                    updatePlatformField('official-dau', 'official-dau-display');
+                    updatePlatformField('official-gmv', 'official-gmv-display');
+                    updatePlatformField('official-margin', 'official-margin-display');
+                    updatePlatformField('zhenxuan-dau', 'zhenxuan-dau-display');
+                    updatePlatformField('zhenxuan-gmv', 'zhenxuan-gmv-display');
+                    updatePlatformField('zhenxuan-margin', 'zhenxuan-margin-display');
+                    updatePlatformField('baifude-dau', 'baifude-dau-display');
+                    updatePlatformField('baifude-gmv', 'baifude-gmv-display');
+                    updatePlatformField('baifude-margin', 'baifude-margin-display');
+                    
+                    // 强制更新图表
+                    updateChartsFromTable();
+                    break;
+                case 'marketing-overview':
+                    updateText('mkt-gmv', 'mkt-gmv-display');
+                    updateText('mkt-margin', 'mkt-margin-display');
+                    updateText('mkt-above', 'mkt-above-display');
+                    updateText('mkt-profit', 'mkt-profit-display');
+                    updateText('mkt-note', 'mkt-note-display');
+                    break;
+                case 'commercial-marketing':
+                    updateField('cm-target', 'cm-target-display');
+                    updateField('cm-actual', 'cm-actual-display');
+                    updateCMProgress();
+                    updateText('cm-note', 'cm-note-display');
+                    break;
+                case 'marketing-jilafu':
+                    updateText('mk-jilafu-gmv', 'mk-jilafu-gmv-display');
+                    updateText('mk-jilafu-margin', 'mk-jilafu-margin-display');
+                    updateText('mk-jilafu-note', 'mk-jilafu-note-display');
+                    break;
+                case 'qiwushe':
+                    updateText('qiwu-dau', 'qiwu-dau-display');
+                    updateText('qiwu-gmv', 'qiwu-gmv-display');
+                    updateText('qiwu-margin', 'qiwu-margin-display');
+                    updateText('qiwu-note', 'qiwu-note-display');
+                    break;
+                case 'good-clients':
+                    updateTextarea('good-clients-text', 'good-clients-display');
+                    break;
+                case 'bad-clients':
+                    updateTextarea('bad-clients-text', 'bad-clients-display');
+                    break;
+                case 'bidding-details':
+                    updateTextarea('bidding-details-text', 'bidding-details-display');
+                    break;
+                case 'product-progress':
+                    updateTextarea('product-text', 'product-display');
+                    break;
+            }
+        }
+
+        function updateField(inputId, displayId) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(displayId);
+            if (input && display) {
+                display.textContent = input.value;
+            }
+        }
+
+        function updateText(inputId, displayId) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(displayId);
+            if (input && display) {
+                display.textContent = input.value;
+            }
+        }
+
+        // 专门处理分端表现的字段更新（去掉后缀，只显示数字）
+        function updatePlatformField(inputId, displayId) {
+            const input = document.getElementById(inputId);
+            const display = document.getElementById(displayId);
+            if (input && display) {
+                // 对于毛利率，显示时加上%符号
+                if (inputId.includes('margin')) {
+                    display.textContent = input.value;
+                } else if (inputId.includes('gmv')) {
+                    // GMV显示格式化
+                    display.textContent = parseFloat(input.value).toLocaleString();
+                } else {
+                    display.textContent = input.value;
+                }
+            }
+        }
+
+        function updateTextarea(textareaId, displayId) {
+            const textarea = document.getElementById(textareaId);
+            const display = document.getElementById(displayId);
+            if (textarea && display) {
+                display.textContent = textarea.value;
+            }
+        }
+
+        // 进度条更新
+        function updateProgress(cardId) {
+            const target = parseFloat(document.getElementById('revenue-target').value) || 0;
+            const actual = parseFloat(document.getElementById('revenue-actual').value) || 0;
+            const percent = target > 0 ? Math.round((actual / target) * 100) : 0;
+            
+            document.getElementById('revenue-progress').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('revenue-percent').textContent = percent + '%';
+        }
+
+        function updateBidProgress() {
+            const won = parseFloat(document.getElementById('bid-won').value) || 0;
+            const lost = parseFloat(document.getElementById('bid-lost').value) || 0;
+            const total = won + lost;
+            
+            if (total > 0) {
+                const wonPercent = Math.round((won / total) * 100);
+                const lostPercent = 100 - wonPercent;
+                
+                const container = document.getElementById('bid-progress-bar');
+                container.innerHTML = `
+                    <div class="dual-bar blue" style="width: ${wonPercent}%">${wonPercent}%</div>
+                    <div class="dual-bar red" style="width: ${lostPercent}%">${lostPercent}%</div>
+                `;
+            }
+        }
+
+        function updateCMProgress() {
+            const target = parseFloat(document.getElementById('cm-target').value) || 0;
+            const actual = parseFloat(document.getElementById('cm-actual').value) || 0;
+            const percent = target > 0 ? Math.round((actual / target) * 100) : 0;
+            
+            document.getElementById('cm-progress').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('cm-percent').textContent = percent + '%';
+        }
+
+        // 图表实例
+        let dauChart, comboChart;
+
+        function initCharts() {
+            // 通用紧凑图表配置
+            const compactOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 8,
+                            font: {
+                                size: 11,
+                                family: "'Microsoft YaHei', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        titleFont: { size: 11, family: "'Microsoft YaHei', sans-serif" },
+                        bodyFont: { size: 11, family: "'Microsoft YaHei', sans-serif" },
+                        padding: 8,
+                        cornerRadius: 8
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 5,
+                        bottom: 5,
+                        left: 5,
+                        right: 5
+                    }
+                }
+            };
+
+            // DAU柱状图 - 压缩配置
+            const dauCtx = document.getElementById('dauChart').getContext('2d');
+            dauChart = new Chart(dauCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['官网', '甄选', '百福得'],
+                    datasets: [{
+                        label: 'DAU (万)',
+                        data: [45.2, 52.8, 27.6],
+                        backgroundColor: [
+                            'rgba(212, 163, 115, 0.8)',
+                            'rgba(127, 179, 213, 0.8)',
+                            'rgba(232, 165, 152, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(212, 163, 115, 1)',
+                            'rgba(127, 179, 213, 1)',
+                            'rgba(232, 165, 152, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        barThickness: 40,
+                        maxBarThickness: 50
+                    }]
+                },
+                options: {
+                    ...compactOptions,
+                    plugins: {
+                        ...compactOptions.plugins,
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { 
+                                color: 'rgba(0,0,0,0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 10, family: "'Microsoft YaHei', sans-serif" },
+                                padding: 4
+                            }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                font: { size: 11, family: "'Microsoft YaHei', sans-serif" },
+                                padding: 4
+                            }
+                        }
+                    }
+                }
+            });
+
+            // GMV和毛利率组合图 - 压缩配置
+            const comboCtx = document.getElementById('comboChart').getContext('2d');
+            comboChart = new Chart(comboCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['官网', '甄选', '百福得'],
+                    datasets: [{
+                        label: 'GMV (万)',
+                        data: [1250, 1890, 856],
+                        backgroundColor: 'rgba(212, 163, 115, 0.7)',
+                        borderColor: 'rgba(212, 163, 115, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        yAxisID: 'y',
+                        order: 2,
+                        barThickness: 30,
+                        maxBarThickness: 40
+                    }, {
+                        label: '毛利率 (%)',
+                        data: [25.3, 22.7, 28.1],
+                        type: 'line',
+                        borderColor: 'rgba(231, 76, 60, 0.9)',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(231, 76, 60, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 1,
+                        pointHoverRadius: 5,
+                        yAxisID: 'y1',
+                        order: 1,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    ...compactOptions,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { 
+                                color: 'rgba(0,0,0,0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 10, family: "'Microsoft YaHei', sans-serif" },
+                                padding: 4,
+                                callback: function(value) {
+                                    return value >= 1000 ? (value/1000).toFixed(1) + 'k' : value;
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { 
+                                drawOnChartArea: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: { size: 10, family: "'Microsoft YaHei', sans-serif" },
+                                padding: 4,
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            min: 0,
+                            max: 35
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                font: { size: 11, family: "'Microsoft YaHei', sans-serif" },
+                                padding: 4
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 从表格数据更新图表 - 关键修复函数
+        function updateChartsFromTable() {
+            // 获取官网数据
+            const officialDAU = parseFloat(document.getElementById('official-dau').value) || 0;
+            const officialGMV = parseFloat(document.getElementById('official-gmv').value) || 0;
+            const officialMargin = parseFloat(document.getElementById('official-margin').value) || 0;
+            
+            // 获取甄选数据
+            const zhenxuanDAU = parseFloat(document.getElementById('zhenxuan-dau').value) || 0;
+            const zhenxuanGMV = parseFloat(document.getElementById('zhenxuan-gmv').value) || 0;
+            const zhenxuanMargin = parseFloat(document.getElementById('zhenxuan-margin').value) || 0;
+            
+            // 获取百福得数据
+            const baifudeDAU = parseFloat(document.getElementById('baifude-dau').value) || 0;
+            const baifudeGMV = parseFloat(document.getElementById('baifude-gmv').value) || 0;
+            const baifudeMargin = parseFloat(document.getElementById('baifude-margin').value) || 0;
+            
+            // 更新DAU图表
+            if (dauChart) {
+                dauChart.data.datasets[0].data = [officialDAU, zhenxuanDAU, baifudeDAU];
+                dauChart.update('none'); // 使用'none'模式避免过度动画
+            }
+            
+            // 更新组合图表
+            if (comboChart) {
+                comboChart.data.datasets[0].data = [officialGMV, zhenxuanGMV, baifudeGMV];
+                comboChart.data.datasets[1].data = [officialMargin, zhenxuanMargin, baifudeMargin];
+                comboChart.update('none');
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        // 自适应文本框高度
+        function initAutoResize() {
+            document.querySelectorAll('.editable-textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.max(60, this.scrollHeight) + 'px';
+                });
+            });
+        }
+
+        // 导出功能
+        function exportToImage() {
+            const overlay = document.getElementById('exportOverlay');
+            const content = document.getElementById('reportContent');
+            
+            // 显示加载遮罩
+            overlay.classList.add('active');
+            
+            // 临时隐藏导出按钮以免被截图
+            const exportBtn = document.querySelector('.export-btn');
+            exportBtn.style.display = 'none';
+            
+            // 确保所有编辑都保存并切换到显示模式
+            editingStates.forEach((isEditing, cardId) => {
+                if (isEditing) toggleEdit(cardId);
+            });
+            
+            // 等待一下确保渲染完成
+            setTimeout(() => {
+                html2canvas(content, {
+                    scale: 2, // 高清截图
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null, // 透明背景，让CSS背景生效
+                    logging: false,
+                    windowWidth: content.scrollWidth,
+                    windowHeight: content.scrollHeight
+                }).then(canvas => {
+                    // 恢复导出按钮
+                    exportBtn.style.display = 'flex';
+                    
+                    // 下载图片
+                    const link = document.createElement('a');
+                    link.download = `运营部周报_${new Date().toLocaleDateString()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // 隐藏加载遮罩
+                    overlay.classList.remove('active');
+                }).catch(err => {
+                    console.error('Export failed:', err);
+                    alert('导出失败，请重试');
+                    exportBtn.style.display = 'flex';
+                    overlay.classList.remove('active');
+                });
+            }, 500);
+        }
+
+        // ==========================================
+        // 云同步模块 (jsonblob.com - 无需注册)
+        // ==========================================
+        const CLOUD_STORAGE_KEY = 'weekly_report_blob_id';
+        const CLOUD_API = 'https://jsonblob.com/api/jsonBlob';
+        let currentBlobId = localStorage.getItem(CLOUD_STORAGE_KEY) || '';
+        let saveTimer = null;
+        let isCloudSaving = false;
+
+        // 所有需要持久化的输入字段 ID
+        const PERSIST_FIELDS = [
+            'revenue-target', 'revenue-actual',
+            'jilafu-gmv', 'jilafu-margin',
+            'bid-won', 'bid-lost',
+            'accounts-text',
+            'exchange-total', 'exchange-yoy',
+            'dau-input', 'orders-input', 'conversion-input',
+            'search-uv', 'search-pv', 'search-noresult', 'search-note',
+            'official-dau', 'official-gmv', 'official-margin',
+            'zhenxuan-dau', 'zhenxuan-gmv', 'zhenxuan-margin',
+            'baifude-dau', 'baifude-gmv', 'baifude-margin',
+            'mkt-gmv', 'mkt-margin', 'mkt-above', 'mkt-profit', 'mkt-note',
+            'cm-target', 'cm-actual', 'cm-note',
+            'mk-jilafu-gmv', 'mk-jilafu-margin', 'mk-jilafu-note',
+            'qiwu-dau', 'qiwu-gmv', 'qiwu-margin', 'qiwu-note',
+            'good-clients-text',
+            'bad-clients-text',
+            'bidding-details-text',
+            'product-text'
+        ];
+
+        // 收集所有字段数据
+        function collectData() {
+            const data = {};
+            PERSIST_FIELDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) data[id] = el.value;
+            });
+            data._version = 2;
+            data._updatedAt = new Date().toISOString();
+            return data;
+        }
+
+        // 填充所有字段数据
+        function applyData(data) {
+            if (!data || data._version !== 2) return false;
+            PERSIST_FIELDS.forEach(id => {
+                if (data[id] !== undefined) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = data[id];
+                }
+            });
+            return true;
+        }
+
+        // 从云端加载数据
+        async function loadFromCloud() {
+            if (!currentBlobId) {
+                setSyncStatus('disconnected', '未连接云同步');
+                return false;
+            }
+            try {
+                setSyncStatus('saving', '正在加载...');
+                const resp = await fetch(`${CLOUD_API}/${currentBlobId}`);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                const applied = applyData(data);
+                if (applied) {
+                    // 刷新所有显示和图表
+                    refreshAllDisplays();
+                    setSyncStatus('connected', '已连接 · ' + (data._updatedAt ? new Date(data._updatedAt).toLocaleString('zh-CN') : '已同步'));
+                    return true;
+                } else {
+                    setSyncStatus('disconnected', '数据格式不兼容');
+                    return false;
+                }
+            } catch (e) {
+                console.error('加载失败:', e);
+                setSyncStatus('disconnected', '加载失败：' + e.message);
+                return false;
+            }
+        }
+
+        // 保存到云端
+        async function saveToCloud() {
+            if (!currentBlobId || isCloudSaving) return;
+            isCloudSaving = true;
+            try {
+                setSyncStatus('saving', '保存中...');
+                const data = collectData();
+                const resp = await fetch(`${CLOUD_API}/${currentBlobId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                setSyncStatus('connected', '已同步 · ' + new Date().toLocaleTimeString('zh-CN'));
+            } catch (e) {
+                console.error('保存失败:', e);
+                setSyncStatus('disconnected', '保存失败：' + e.message);
+            } finally {
+                isCloudSaving = false;
+            }
+        }
+
+        // 防抖保存（编辑后 2 秒自动保存）
+        function debouncedSave() {
+            if (!currentBlobId) return;
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => saveToCloud(), 2000);
+        }
+
+        // 手动同步按钮
+        async function manualSync() {
+            const btn = document.getElementById('syncBtn');
+            btn.classList.add('syncing');
+            await loadFromCloud();
+            setTimeout(() => btn.classList.remove('syncing'), 1000);
+        }
+
+        // 刷新所有显示元素和图表
+        function refreshAllDisplays() {
+            // 刷新所有字段的显示值
+            const cardIds = [
+                'commercial-revenue', 'jilafu-exchange', 'bidding-stats', 'key-accounts',
+                'exchange-overview', 'traffic-overview', 'search-traffic',
+                'platform-performance',
+                'marketing-overview', 'commercial-marketing', 'marketing-jilafu', 'qiwushe',
+                'good-clients', 'bad-clients', 'bidding-details', 'product-progress'
+            ];
+            cardIds.forEach(id => saveChanges(id));
+        }
+
+        // 更新同步状态显示
+        function setSyncStatus(state, text) {
+            const el = document.getElementById('syncStatus');
+            const textEl = document.getElementById('syncStatusText');
+            el.className = 'sync-status ' + state;
+            textEl.textContent = text;
+        }
+
+        // 显示/隐藏配置面板
+        function showSetup() {
+            const overlay = document.getElementById('setupOverlay');
+            const input = document.getElementById('blobIdInput');
+            input.value = currentBlobId;
+            overlay.classList.add('active');
+        }
+
+        function hideSetup() {
+            document.getElementById('setupOverlay').classList.remove('active');
+        }
+
+        // 创建新的 jsonblob
+        async function createBlob() {
+            const data = collectData();
+            try {
+                const resp = await fetch(CLOUD_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!resp.ok) throw new Error('创建失败');
+                const location = resp.headers.get('Location') || resp.headers.get('location');
+                if (location) {
+                    const blobId = location.split('/').pop();
+                    document.getElementById('blobIdInput').value = blobId;
+                    alert('✅ 数据桶创建成功！\n\nBlob ID: ' + blobId + '\n\n请点击「保存并连接」完成配置。\n请把这个 ID 分享给团队成员。');
+                } else {
+                    alert('创建成功但未获取到 ID，请检查网络后重试。');
+                }
+            } catch (e) {
+                alert('创建失败：' + e.message + '\n\n请检查网络连接后重试。');
+            }
+        }
+
+        // 保存 Blob ID 并连接
+        function saveBlobId() {
+            const input = document.getElementById('blobIdInput');
+            const blobId = input.value.trim();
+            if (!blobId) {
+                alert('请输入数据桶 ID');
+                return;
+            }
+            currentBlobId = blobId;
+            localStorage.setItem(CLOUD_STORAGE_KEY, blobId);
+            hideSetup();
+            // 立即从云端加载
+            loadFromCloud();
+        }
+
+        // 覆写 toggleEdit，加入云保存触发
+        const _origToggleEdit = toggleEdit;
+        toggleEdit = function(cardId) {
+            _origToggleEdit(cardId);
+            // 编辑保存后触发云同步
+            const isEditing = editingStates.get(cardId);
+            if (!isEditing) {
+                // 刚保存编辑，触发云同步
+                debouncedSave();
+            }
+        };
+
+        // 初始化
+        window.onload = function() {
+            createStars();
+            initCharts();
+            initAutoResize();
+            updateChartsFromTable();
+            
+            // 如果有云端配置，自动加载
+            if (currentBlobId) {
+                loadFromCloud();
+            }
+        };
+    </script>
+</body>
+</html>
