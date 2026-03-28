@@ -1,6 +1,6 @@
 {
-  "revenue-target": "100",
-  "revenue-actual": "65",
+  "revenue-target": "600",
+  "revenue-actual": "62.5",
   "jilafu-gmv": "¥2,450万",
   "jilafu-margin": "23.5%",
   "bid-won": "12",
@@ -65,5 +65,5 @@
   "_t_c-bad": "进展不佳的客户",
   "_t_c14": "本周产品动态",
   "_v": 2,
-  "_time": "2026-03-28T17:32:05.806Z"
+  "_time": "2026-03-28T18:08:39.895Z"
 }
