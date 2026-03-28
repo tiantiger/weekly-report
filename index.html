@@ -1817,9 +1817,9 @@
             // 显示加载遮罩
             overlay.classList.add('active');
             
-            // 临时隐藏导出按钮以免被截图
-            const exportBtn = document.getElementById('exportBtn');
-            exportBtn.style.display = 'none';
+            // 临时隐藏整个按钮组以免被截图
+            const btnGroup = document.getElementById('cloudBtnGroup');
+            btnGroup.style.display = 'none';
             
             // 确保所有编辑都保存并切换到显示模式
             editingStates.forEach((isEditing, cardId) => {
@@ -1837,8 +1837,8 @@
                     windowWidth: content.scrollWidth,
                     windowHeight: content.scrollHeight
                 }).then(canvas => {
-                    // 恢复导出按钮
-                    exportBtn.style.display = 'flex';
+                    // 恢复按钮组
+                    btnGroup.style.display = 'flex';
                     
                     // 下载图片
                     const link = document.createElement('a');
@@ -1851,7 +1851,7 @@
                 }).catch(err => {
                     console.error('Export failed:', err);
                     alert('导出失败，请重试');
-                    exportBtn.style.display = 'flex';
+                    btnGroup.style.display = 'flex';
                     overlay.classList.remove('active');
                 });
             }, 500);
