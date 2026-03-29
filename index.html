@@ -777,6 +777,146 @@
         div, span, p, input, textarea, button, table, th, td {
             font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
         }
+
+        /* 恢复弹窗 */
+        .restore-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .restore-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .restore-modal-content {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 0;
+            width: 340px;
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            animation: restoreModalIn 0.25s ease;
+        }
+
+        @keyframes restoreModalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .restore-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px 12px;
+        }
+
+        .restore-modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .restore-modal-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .restore-modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .restore-modal-body {
+            padding: 8px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .restore-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1.5px solid transparent;
+        }
+
+        .restore-option:hover {
+            background: rgba(212, 163, 115, 0.08);
+            border-color: rgba(212, 163, 115, 0.3);
+            transform: translateX(4px);
+        }
+
+        .restore-option:active {
+            transform: scale(0.98);
+        }
+
+        .restore-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center;
+        }
+
+        .restore-info {
+            flex: 1;
+        }
+
+        .restore-time {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .restore-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .restore-arrow {
+            font-size: 20px;
+            color: rgba(0, 0, 0, 0.15);
+            flex-shrink: 0;
+        }
+
+        .restore-modal-footer {
+            padding: 12px 24px 16px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
     </style>
 </head>
 <body>
@@ -801,6 +941,9 @@
             <button class="action-btn" id="syncBtn" onclick="manualSync()">
                 <span class="action-icon">☁️</span><span class="action-text">同步数据</span>
             </button>
+            <button class="action-btn" id="restoreBtn" onclick="showRestoreModal()">
+                <span class="action-icon">⏪</span><span class="action-text">恢复</span>
+            </button>
         </div>
         <input type="file" id="excelInput" accept=".xlsx,.xls" style="display:none" onchange="importFromExcel(event)">
         <!-- 同步状态 -->
@@ -808,6 +951,44 @@
             <div class="sync-dot"></div>
             <span id="syncStatusText">正在连接...</span>
         </div>
+
+    <!-- 恢复历史弹窗 -->
+    <div class="restore-modal" id="restoreModal" style="display:none;">
+        <div class="restore-modal-overlay" onclick="hideRestoreModal()"></div>
+        <div class="restore-modal-content">
+            <div class="restore-modal-header">
+                <span class="restore-modal-title">⏪ 恢复内容</span>
+                <button class="restore-modal-close" onclick="hideRestoreModal()">✕</button>
+            </div>
+            <div class="restore-modal-body">
+                <div class="restore-option" onclick="restoreToTime(5)">
+                    <div class="restore-icon">🕐</div>
+                    <div class="restore-info">
+                        <div class="restore-time">5 分钟前</div>
+                        <div class="restore-desc">恢复到约 5 分钟前的版本</div>
+                    </div>
+                    <div class="restore-arrow">›</div>
+                </div>
+                <div class="restore-option" onclick="restoreToTime(60)">
+                    <div class="restore-icon">🕑</div>
+                    <div class="restore-info">
+                        <div class="restore-time">1 小时前</div>
+                        <div class="restore-desc">恢复到约 1 小时前的版本</div>
+                    </div>
+                    <div class="restore-arrow">›</div>
+                </div>
+                <div class="restore-option" onclick="restoreToTime(360)">
+                    <div class="restore-icon">🕕</div>
+                    <div class="restore-info">
+                        <div class="restore-time">6 小时前</div>
+                        <div class="restore-desc">恢复到约 6 小时前的版本</div>
+                    </div>
+                    <div class="restore-arrow">›</div>
+                </div>
+            </div>
+            <div class="restore-modal-footer">恢复将替换当前所有内容，不可撤销</div>
+        </div>
+    </div>
 
     <!-- 导出加载遮罩 -->
     <div class="export-overlay" id="exportOverlay">
@@ -2065,6 +2246,71 @@
             t.textContent=msg;
             t.className='import-toast'+(type==='error'?' error':'')+' show';
             setTimeout(function(){t.className='import-toast';},3000);
+        }
+
+        // ===== 恢复功能 =====
+        function showRestoreModal() {
+            document.getElementById('restoreModal').style.display = 'flex';
+        }
+
+        function hideRestoreModal() {
+            document.getElementById('restoreModal').style.display = 'none';
+        }
+
+        function restoreToTime(minutesAgo) {
+            var timeLabels = {5: '5 分钟前', 60: '1 小时前', 360: '6 小时前'};
+            var timeLabel = timeLabels[minutesAgo] || minutesAgo + ' 分钟前';
+
+            if (!confirm('确定要恢复到' + timeLabel + '的版本吗？\n\n当前所有内容将被替换，此操作不可撤销。')) {
+                return;
+            }
+
+            hideRestoreModal();
+            _ss('saving', '正在查找历史版本...');
+
+            _gh('https://api.github.com/repos/' + _repo + '/commits?path=data.json&per_page=100')
+                .then(function(commits) {
+                    var targetTime = Date.now() - minutesAgo * 60 * 1000;
+                    var bestCommit = null;
+                    var bestDiff = Infinity;
+
+                    for (var i = 0; i < commits.length; i++) {
+                        var commitTime = new Date(commits[i].commit.author.date).getTime();
+                        var diff = targetTime - commitTime;
+                        if (diff >= 0 && diff < bestDiff) {
+                            bestDiff = diff;
+                            bestCommit = commits[i];
+                        }
+                    }
+
+                    if (!bestCommit && commits.length > 0) {
+                        bestCommit = commits[commits.length - 1];
+                    }
+
+                    if (!bestCommit) {
+                        _ss('disconnected', '没有历史版本');
+                        _showToast('没有找到可恢复的历史版本', 'error');
+                        return;
+                    }
+
+                    var commitDate = new Date(bestCommit.commit.author.date);
+                    _ss('saving', '正在恢复...');
+
+                    return _gh('https://api.github.com/repos/' + _repo + '/contents/data.json?ref=' + bestCommit.sha)
+                        .then(function(fileData) {
+                            var d = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+                            _apply(d);
+                            _refreshAll();
+                            updateChartsFromTable();
+                            _ds();
+                            _showToast('已恢复到 ' + commitDate.toLocaleTimeString('zh-CN') + ' 的版本');
+                        });
+                })
+                .catch(function(e) {
+                    console.error(e);
+                    _ss('disconnected', '恢复失败');
+                    _showToast('恢复失败: ' + e.message, 'error');
+                });
         }
 
         // 初始化
