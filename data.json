@@ -5,7 +5,7 @@
   "jilafu-margin": "12.9%",
   "bid-won": "12",
   "bid-lost": "3",
-  "accounts-text": "这里随便填文本",
+  "accounts-text": "",
   "exchange-total": "37.1亿元",
   "exchange-yoy": "+17.2%",
   "dau-input": "125.6万",
@@ -65,5 +65,5 @@
   "_t_c-bad": "进展不佳的客户",
   "_t_c14": "本周产品动态",
   "_v": 2,
-  "_time": "2026-03-29T13:03:21.087Z"
+  "_time": "2026-03-29T13:20:13.912Z"
 }
